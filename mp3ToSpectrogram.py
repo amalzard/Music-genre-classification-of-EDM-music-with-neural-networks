@@ -62,14 +62,17 @@ for index, flacFilename in enumerate(flacFiles):
 musicFiles = os.listdir(mp3Folder)
 mp3Files = [file for file in musicFiles if file.endswith(".mp3")]
 nbFiles = len(mp3Files)
-for index, filename in enumerate(mp3Files):
-	print "Creating spectrogram for file {}/{}...".format(index+1,nbFiles)
-	fileGenre = getGenre(mp3Folder+filename)
-	genresID[fileGenre] = genresID[fileGenre] + 1 if fileGenre in genresID else 1
-	fileID = genresID[fileGenre]
-	if fileGenre == None:
-		fileGenre = "noGenre"
-	newFilename = fileGenre+"_"+str(fileID)
-	createSpectrogram(filename, newFilename, fileGenre)
-print("Spectrograms Created!")
+if len(mp3Files) > 0:
+	for index, filename in enumerate(mp3Files):
+		print "Creating spectrogram for file {}/{}...".format(index+1,nbFiles)
+		fileGenre = getGenre(mp3Folder+filename)
+		genresID[fileGenre] = genresID[fileGenre] + 1 if fileGenre in genresID else 1
+		fileID = genresID[fileGenre]
+		if fileGenre == None:
+			fileGenre = "noGenre"
+		newFilename = fileGenre+"_"+str(fileID)
+		createSpectrogram(filename, newFilename, fileGenre)
+	print("Spectrograms Created!")
+else:
+	print("No mp3 files in mp3 folder")
 
