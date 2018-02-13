@@ -12,7 +12,7 @@ wavFolder=currentPath+"/wav/"
 spectrogramsPath=currentPath+"/spectrograms/"
 
 
-
+#Extracts the genre from an mp3 file. Returns None if field is blank
 def getGenre(filename):
 	print(filename)
 	audiofile = eyed3.load(filename)
@@ -21,6 +21,7 @@ def getGenre(filename):
 	else:
 		return audiofile.tag.genre.name.encode('utf-8')
 
+#Converts the mp3 file to .wav, downmixes to mono and then creates a spectrogram of the .wav and deletes the .wav
 def createSpectrogram(filename, newFilename, fileGenre):
 	mp3 = pydub.AudioSegment.from_mp3(mp3Folder+filename)
 	#mix stereo to mono
