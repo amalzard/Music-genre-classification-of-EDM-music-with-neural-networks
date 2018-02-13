@@ -14,7 +14,6 @@ spectrogramsPath=currentPath+"/spectrograms/"
 
 #Extracts the genre from an mp3 file. Returns None if field is blank
 def getGenre(filename):
-	print(filename)
 	audiofile = eyed3.load(filename)
 	if not audiofile.tag.genre:
 		return None
@@ -40,10 +39,10 @@ def createSpectrogram(filename, newFilename, fileGenre):
 	print("Deleting .wav...")
 	os.remove(exportedFile)
 
+#coverts flac to mp3, keeping tags. Then deletes the flac
 def convertFlacToMp3(filename):
 	convertedFilename = str(datetime.datetime.now()).split('.')[0]
-	command = 'ffmpeg -i "{}" -ab 320k -map_metadata 0 -id3v2_version 3 "{}.mp3"'.format(mp3Folder+filename, mp3Folder+convertedFilename)
-	print(command)
+	command = 'ffmpeg -loglevel panic -i "{}" -ab 320k -map_metadata 0 -id3v2_version 3 "{}.mp3"'.format(mp3Folder+filename, mp3Folder+convertedFilename)
 	p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True, cwd=currentPath)
 	output, errors = p.communicate()
 	if errors:
@@ -52,13 +51,34 @@ def convertFlacToMp3(filename):
 	os.remove(mp3Folder+filename)
 
 
+def convertOogToMp3(filename):
+	convertedFilename = str(datetime.datetime.now()).split('.')[0]
+	command = 'ffmpeg -loglevel panic -i "{}" -ab 320k -map_metadata 0:s:0 -acodec libmp3lame "{}.mp3"'.format(mp3Folder+filename, mp3Folder+convertedFilename)
+	p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True, cwd=currentPath)
+	output, errors = p.communicate()
+	if errors:
+		print errors
+	print("Deleting .ogg...")
+	os.remove(mp3Folder+filename)
+
+
 genresID = dict()
 musicFiles = os.listdir(mp3Folder)
 flacFiles = [file for file in musicFiles if file.endswith(".flac")]
 nbFiles = len(flacFiles)
-for index, flacFilename in enumerate(flacFiles):
-	convertFlacToMp3(flacFilename)
-
+if len(flacFiles) > 0:
+	print("Found flac files. Converting to mp3...")
+	for index, flacFilename in enumerate(flacFiles):
+		print "Converting file {}/{}...".format(index+1,nbFiles)
+		convertFlacToMp3(flacFilename)
+musicFiles = os.listdir(mp3Folder)
+oggFiles = [file for file in musicFiles if file.endswith(".ogg")]
+nbFiles = len(oggFiles)
+if len(oggFiles) > 0:
+	print("Found ogg files. Converting to mp3...")
+	for index, oggFilename in enumerate(oggFiles):
+		print "Converting file {}/{}...".format(index+1,nbFiles)
+		convertOogToMp3(oggFilename)
 musicFiles = os.listdir(mp3Folder)
 mp3Files = [file for file in musicFiles if file.endswith(".mp3")]
 nbFiles = len(mp3Files)
