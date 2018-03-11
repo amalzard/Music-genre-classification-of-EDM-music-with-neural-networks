@@ -5,6 +5,7 @@ from PIL import Image
 import eyed3
 import sys
 import datetime
+from config import pixelPerSecond
 
 #directories for file I/O
 currentPath = os.path.dirname(os.path.realpath(__file__))
@@ -30,8 +31,7 @@ def createSpectrogram(filename, newFilename, fileGenre):
 	#convert to wav
 	mp3.export(wavFolder+newFilename, format="wav")
 	exportedFile = wavFolder+newFilename
-	pixelPerSecond = 50
-	command = "sox '{}' -n spectrogram -y 128 -X {} -h -r -o '{}.png'".format(exportedFile,pixelPerSecond,spectrogramsPath+"/"+newFilename)
+	command = "sox '{}' -n spectrogram -Y 200 -X {} -m -z 60 -r -o '{}.png'".format(exportedFile,pixelPerSecond,spectrogramsPath+"/"+newFilename)
 	p = Popen(command, shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True, cwd=currentPath)
 	output, errors = p.communicate()
 	if errors:
@@ -72,40 +72,41 @@ def renameMp3Files():
 			os.rename(mp3Folder+filename, mp3Folder+convertedFilename)
 
 
-genresID = dict()
-musicFiles = os.listdir(mp3Folder)
-flacFiles = [file for file in musicFiles if file.endswith(".flac")]
-nbFiles = len(flacFiles)
-if len(flacFiles) > 0:
-	print("Found flac files. Converting to mp3...")
-	for index, flacFilename in enumerate(flacFiles):
-		print "Converting file {}/{}...".format(index+1,nbFiles)
-		convertFlacToMp3(flacFilename)
+def convertMp3ToSpectrogram():
+	genresID = dict()
+	musicFiles = os.listdir(mp3Folder)
+	flacFiles = [file for file in musicFiles if file.endswith(".flac")]
+	nbFiles = len(flacFiles)
+	if len(flacFiles) > 0:
+		print("Found flac files. Converting to mp3...")
+		for index, flacFilename in enumerate(flacFiles):
+			print "Converting file {}/{}...".format(index+1,nbFiles)
+			convertFlacToMp3(flacFilename)
 
-musicFiles = os.listdir(mp3Folder)
-oggFiles = [file for file in musicFiles if file.endswith(".ogg")]
-nbFiles = len(oggFiles)
-if len(oggFiles) > 0:
-	print("Found ogg files. Converting to mp3...")
-	for index, oggFilename in enumerate(oggFiles):
-		print "Converting file {}/{}...".format(index+1,nbFiles)
-		convertOogToMp3(oggFilename)
+	musicFiles = os.listdir(mp3Folder)
+	oggFiles = [file for file in musicFiles if file.endswith(".ogg")]
+	nbFiles = len(oggFiles)
+	if len(oggFiles) > 0:
+		print("Found ogg files. Converting to mp3...")
+		for index, oggFilename in enumerate(oggFiles):
+			print "Converting file {}/{}...".format(index+1,nbFiles)
+			convertOogToMp3(oggFilename)
 
-renameMp3Files()
-musicFiles = os.listdir(mp3Folder)
-mp3Files = [file for file in musicFiles if file.endswith(".mp3")]
-nbFiles = len(mp3Files)
-if len(mp3Files) > 0:
-	for index, filename in enumerate(mp3Files):
-		print "Creating spectrogram for file {}/{}...".format(index+1,nbFiles)
-		fileGenre = getGenre(mp3Folder+filename)
-		genresID[fileGenre] = genresID[fileGenre] + 1 if fileGenre in genresID else 1
-		fileID = genresID[fileGenre]
-		if fileGenre == None:
-			fileGenre = "noGenre"
-		newFilename = fileGenre+"_"+str(fileID)
-		createSpectrogram(filename, newFilename, fileGenre)
-	print("Spectrograms Created!")
-else:
-	print("No mp3 files in mp3 folder")
+	renameMp3Files()
+	musicFiles = os.listdir(mp3Folder)
+	mp3Files = [file for file in musicFiles if file.endswith(".mp3")]
+	nbFiles = len(mp3Files)
+	if len(mp3Files) > 0:
+		for index, filename in enumerate(mp3Files):
+			print "Creating spectrogram for file {}/{}...".format(index+1,nbFiles)
+			fileGenre = getGenre(mp3Folder+filename)
+			genresID[fileGenre] = genresID[fileGenre] + 1 if fileGenre in genresID else 1
+			fileID = genresID[fileGenre]
+			if fileGenre == None:
+				fileGenre = "noGenre"
+			newFilename = fileGenre+"_"+str(fileID)
+			createSpectrogram(filename, newFilename, fileGenre)
+		print("Spectrograms Created!")
+	else:
+		print("No mp3 files in mp3 folder")
 
