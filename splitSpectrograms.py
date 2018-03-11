@@ -8,12 +8,6 @@ mp3Folder=currentPath+"/mp3/"
 spectrogramsPath=currentPath+"/spectrograms/"
 slicesPath=currentPath+"/spectrogramSlices/"
 
-fileList = []
-cleanedFileList = []
-fileSize = 0
-folderCount = 0
-rootdir = './spectrograms'
-
 def splitSpectrogram(filename):
 	print(filename)
 	img = Image.open(spectrogramsPath + filename)
@@ -26,20 +20,21 @@ def splitSpectrogram(filename):
 		os.makedirs(os.path.dirname(slicePath))
 	for i in range(nbSamples):
 		print "Creating slice: ", (i+1), "/", nbSamples, "for", filename
-		startPixel = i*(width/128)
+		startPixel = i*128
 		imgTmp = img.crop((startPixel, 1, startPixel + 128, 128 + 1))
 		imgTmp.save(slicesPath+"{}/{}_{}.png".format(genre,sliceFilename,i))
 
 
 
 
+def sliceSpectrograms():
 
-spectrogramFiles = os.listdir(spectrogramsPath)
-pngFiles = [file for file in spectrogramFiles if file.endswith(".png")]
-nbFiles = len(spectrogramFiles)
-if len(spectrogramFiles) > 0:
-	for index, filename in enumerate(spectrogramFiles):
-		splitSpectrogram(filename)
-	print("Slices Created!")
-else:
-	print("No spectrograms to slice")
+	spectrogramFiles = os.listdir(spectrogramsPath)
+	pngFiles = [file for file in spectrogramFiles if file.endswith(".png")]
+	nbFiles = len(spectrogramFiles)
+	if len(spectrogramFiles) > 0:
+		for index, filename in enumerate(spectrogramFiles):
+			splitSpectrogram(filename)
+		print("Slices Created!")
+	else:
+		print("No spectrograms to slice")
